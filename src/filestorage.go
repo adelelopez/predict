@@ -3,10 +3,13 @@ package filestorage
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"time"
 
 	"github.com/adelethalialopez/predict/api"
+	"github.com/pborman/uuid"
 )
 
 type FileStorage struct {
@@ -21,6 +24,8 @@ func (fs FileStorage) SavePrediction(p *api.Prediction) error {
 	}
 
 	defer file.Close()
+
+	p.ID = uuid.NewRandom().String()
 
 	if p.CreatedAt == nil {
 		now := time.Now()
@@ -40,6 +45,24 @@ func (fs FileStorage) SavePrediction(p *api.Prediction) error {
 }
 
 func (fs FileStorage) UpdatePrediction(p *api.Prediction) (*api.Prediction, error) {
+	file, err := os.OpenFile(fs.Filename, os.O_APPEND|os.O_RDWR, os.ModeAppend)
+	if err != nil {
+		fmt.Printf("No history file at: %s\n", fs.Filename)
+	}
+
+	dec := json.NewDecoder(file)
+	ps := make([]api.Prediction, 0, 20)
+
+	for {
+		var np api.Prediction
+
+		if err := dec.Decode(&np); err == io.EOF {
+			break
+		} else if err != nil {
+			log.Fatal(err)
+		}
+		ps = append(ps, np)
+	}
 	return nil, nil
 }
 
