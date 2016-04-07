@@ -1,11 +1,13 @@
 package api
 
-import "time"
+import (
+	"time"
+)
 
 type Prediction struct {
 	ID          string
 	Name        string
-	Probability float64
+	Probability *float64
 	Outcome     *bool
 	Tags        []string
 	CreatedAt   *time.Time
@@ -26,23 +28,46 @@ type Statistics struct {
 	Buckets          []Bucket
 }
 
-type History struct {
-	Predictions []Prediction
-}
+var (
+	True  = true
+	False = false
+)
 
 func CreatePrediction(p Prediction, s Storage) (*Prediction, error) {
-	err := s.SavePrediction(&p)
-	return &p, err
+	return s.SavePrediction(&p)
 }
 
-func JudgePrediction(p Prediction, s Storage) (*Prediction, error) {
-	return nil, nil
+func UpdatePrediction(p Prediction, s Storage) (*Prediction, error) {
+	// TODO: actually write this
+	return &p, s.UpdatePrediction(p.ID, p)
+}
+
+func JudgeLastPrediction(outcome bool, s Storage) (*Prediction, error) {
+	ps, err := s.GetPredictions(nil)
+	if err != nil {
+
+	}
+
+	mostRecent := time.Unix(0, 0)
+
+	id := ""
+	for _, prediction := range ps {
+		if (*prediction.CreatedAt).After(mostRecent) && prediction.Outcome == nil {
+			mostRecent = *prediction.CreatedAt
+			id = prediction.ID
+		}
+	}
+
+	p := Prediction{
+		Outcome: &outcome,
+	}
+	return &p, s.UpdatePrediction(id, p)
 }
 
 func GetStats(s Storage) (*Statistics, error) {
 	return nil, nil
 }
 
-func GetHistory(s Storage) (*History, error) {
-	return nil, nil
+func GetHistory(s Storage) ([]Prediction, error) {
+	return s.GetPredictions(nil)
 }
