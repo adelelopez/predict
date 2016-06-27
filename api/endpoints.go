@@ -18,6 +18,7 @@ type Bucket struct {
 	LeftBound  float64
 	RightBound float64
 	Star       float64
+	Mean       float64
 	Size       int64
 }
 
@@ -39,13 +40,32 @@ func CreatePrediction(p Prediction, s Storage) (*Prediction, error) {
 
 func UpdatePrediction(p Prediction, s Storage) (*Prediction, error) {
 	// TODO: actually write this
-	return &p, s.UpdatePrediction(p.ID, p)
+	return s.UpdatePrediction(p.ID, p)
+}
+
+func AmendLastPrediction(amendments Prediction, s Storage) (*Prediction, error) {
+	ps, err := s.GetPredictions(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	mostRecent := time.Unix(0, 0)
+
+	id := ""
+	for _, prediction := range ps {
+		if (*prediction.CreatedAt).After(mostRecent) {
+			mostRecent = *prediction.CreatedAt
+			id = prediction.ID
+		}
+	}
+
+	return s.UpdatePrediction(id, amendments)
 }
 
 func JudgeLastPrediction(outcome bool, s Storage) (*Prediction, error) {
 	ps, err := s.GetPredictions(nil)
 	if err != nil {
-
+		return nil, err
 	}
 
 	mostRecent := time.Unix(0, 0)
@@ -61,11 +81,23 @@ func JudgeLastPrediction(outcome bool, s Storage) (*Prediction, error) {
 	p := Prediction{
 		Outcome: &outcome,
 	}
-	return &p, s.UpdatePrediction(id, p)
+	return s.UpdatePrediction(id, p)
 }
 
 func GetStats(s Storage) (*Statistics, error) {
-	return nil, nil
+	hist, err := s.GetPredictions(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Decide on buckets
+	// Add predictions to their bucket
+	// Calculate total score, and scores for each bucket 
+
+	stats := Statistics{
+		TotalPredictions: len(hist),
+	}
+	return stats, nil
 }
 
 func GetHistory(s Storage) ([]Prediction, error) {
