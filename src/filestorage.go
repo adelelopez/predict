@@ -122,6 +122,7 @@ func (fs *FileStorage) UpdatePrediction(id string, p api.Prediction) error {
 
 	ps := make([]api.Prediction, 0, len(fs.data))
 
+	returnP := p
 	for _, np := range fs.data {
 		if np.ID == id {
 			p.ID = id
@@ -142,13 +143,19 @@ func (fs *FileStorage) UpdatePrediction(id string, p api.Prediction) error {
 			// TODO: don't update tags if blank
 
 			ps = append(ps, p)
+			returnP = p 
 		} else {
 			ps = append(ps, np)
 		}
 	}
 
 	fs.data = ps
-	return fs.writeData()
+	err = fs.writeData()
+	if err != nil {
+		return nil, err
+	}
+
+	return returnP, nil
 }
 
 func (fs *FileStorage) GetPrediction(id string) (*api.Prediction, error) {
