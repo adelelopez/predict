@@ -114,10 +114,10 @@ func (fs *FileStorage) SavePrediction(p *api.Prediction) (*api.Prediction, error
 	return p, nil
 }
 
-func (fs *FileStorage) UpdatePrediction(id string, p api.Prediction) error {
+func (fs *FileStorage) UpdatePrediction(id string, p api.Prediction) (*api.Prediction, error) {
 	err := fs.readData()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	ps := make([]api.Prediction, 0, len(fs.data))
@@ -143,7 +143,7 @@ func (fs *FileStorage) UpdatePrediction(id string, p api.Prediction) error {
 			// TODO: don't update tags if blank
 
 			ps = append(ps, p)
-			returnP = p 
+			returnP = p
 		} else {
 			ps = append(ps, np)
 		}
@@ -155,7 +155,7 @@ func (fs *FileStorage) UpdatePrediction(id string, p api.Prediction) error {
 		return nil, err
 	}
 
-	return returnP, nil
+	return &returnP, nil
 }
 
 func (fs *FileStorage) GetPrediction(id string) (*api.Prediction, error) {

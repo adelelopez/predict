@@ -19,13 +19,13 @@ type Bucket struct {
 	RightBound float64
 	Star       float64
 	Mean       float64
-	Size       int64
+	Size       int
 }
 
 type Statistics struct {
 	BrierScore       float64
-	TotalPredictions int64
-	NumberOfBuckets  int64
+	TotalPredictions int
+	NumberOfBuckets  int
 	Buckets          []Bucket
 }
 
@@ -92,12 +92,12 @@ func GetStats(s Storage) (*Statistics, error) {
 
 	// Decide on buckets
 	// Add predictions to their bucket
-	// Calculate total score, and scores for each bucket 
+	// Calculate total score, and scores for each bucket
 
 	stats := Statistics{
 		TotalPredictions: len(hist),
 	}
-	return stats, nil
+	return &stats, nil
 }
 
 func GetHistory(s Storage) ([]Prediction, error) {
