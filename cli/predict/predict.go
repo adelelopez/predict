@@ -1,12 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"os"
 	"strconv"
 
-	"github.com/adelethalialopez/predict/api"
-	"github.com/adelethalialopez/predict/src"
+	"github.com/adelelopez/predict/api"
+	"github.com/adelelopez/predict/src"
 	"github.com/fatih/color"
 )
 
@@ -59,15 +59,24 @@ func printPrediction(prediction api.Prediction) {
 		outcome)
 }
 
-func main() {
-	fs := filestorage.FileStorage{Filename: "test.txt"}
+var tag string
 
-	if len(os.Args) <= 1 {
-		fmt.Println("Not enough arguments: <help menu>")
+func init() {
+	flag.StringVar(&tag, "tag", "debug", "tag a prediction")
+	flag.StringVar(&tag, "t", "debug", "tag a prediction")
+}
+
+func main() {
+	fs := filestorage.FileStorage{Filename: "~/predictions.txt"}
+
+	flag.Parse()
+
+	if len(flag.Args()) == 0 {
+		fmt.Println("Not enough arguments")
 		return
 	}
 
-	command := os.Args[1]
+	command := flag.Arg(0)
 
 	switch command {
 	case "stats":
@@ -79,7 +88,7 @@ func main() {
 		}
 		stats.Buckets = append(stats.Buckets, api.Bucket{
 			LeftBound:  0.4,
-			RightBound: 0.6,
+			RightBound: 0.7,
 			Star:       0.5,
 			Mean:       0.5,
 		})
@@ -105,8 +114,8 @@ func main() {
 
 		break
 	case "judge":
-		if len(os.Args) == 3 {
-			outcomeStr := os.Args[2]
+		if len(flag.Args()) == 2 {
+			outcomeStr := flag.Arg(1)
 			outcome := false
 			switch outcomeStr {
 			case "true", "True", "TRUE", "t", "T":
@@ -121,8 +130,8 @@ func main() {
 		}
 		break
 	default:
-		if len(os.Args) == 3 {
-			probability := os.Args[2]
+		if len(flag.Args()) == 2 {
+			probability := flag.Arg(1)
 
 			probFloat, err := strconv.ParseFloat(probability, 64)
 
@@ -132,6 +141,7 @@ func main() {
 			p := api.Prediction{
 				Name:        command,
 				Probability: &probFloat,
+				Tags:        []string{tag},
 			}
 
 			_, err = api.CreatePrediction(p, &fs)

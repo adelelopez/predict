@@ -14,7 +14,7 @@ type Prediction struct {
 }
 
 type Bucket struct {
-	BrierScore float64
+	Score      float64
 	LeftBound  float64
 	RightBound float64
 	Star       float64
@@ -23,7 +23,7 @@ type Bucket struct {
 }
 
 type Statistics struct {
-	BrierScore       float64
+	Score            float64
 	TotalPredictions int
 	NumberOfBuckets  int
 	Buckets          []Bucket
@@ -39,7 +39,6 @@ func CreatePrediction(p Prediction, s Storage) (*Prediction, error) {
 }
 
 func UpdatePrediction(p Prediction, s Storage) (*Prediction, error) {
-	// TODO: actually write this
 	return s.UpdatePrediction(p.ID, p)
 }
 

@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/adelethalialopez/predict/api"
+	"github.com/adelelopez/predict/api"
 	"github.com/pborman/uuid"
 )
 
@@ -186,4 +186,12 @@ func (fs *FileStorage) GetPredictions(p *api.Prediction) ([]api.Prediction, erro
 		}
 	}
 	return retPredictions, nil
+}
+
+func (fs *FileStorage) FindPredictionsByName(query string) ([]api.Prediction, error) {
+	err := fs.readData()
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
 }
